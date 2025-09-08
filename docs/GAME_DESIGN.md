@@ -5,19 +5,19 @@
 **Name**: Vibe (working title)
 **Type**: Death-Driven Multi-Generational CLI Roguelike
 **Language**: Rust
-**Core Innovation**: Universal Mathematical Framework enabling infinite emergent narrative
+**Core Innovation**: The Tapestry - A living mathematical weaving system enabling infinite emergent narrative
 
-A revolutionary roguelike where every system—from combat to story generation to world building—operates through a single unified mathematical foundation, creating unprecedented systemic coherence and emergent storytelling.
+A revolutionary roguelike where Story Weavers create living Tapestries by connecting all Threads through The Weaver's mathematical relationships, while players witness emerging Patterns and The Seamstress preserves everything across generations, creating unprecedented systemic coherence and emergent storytelling.
 
 ## Design Philosophy
 
-### The Universal Framework Principle
-Every aspect of the game operates through the same mathematical DNA:
-- **Universal Statistical System**: All entities share the same 10-stat foundation
-- **Universal Contest Resolution**: All interactions use identical mathematical rules
-- **Universal State System**: All temporal changes follow the same patterns
+### The Tapestry Framework Principle
+Every aspect of the game operates through the same weaving mechanics:
+- **Thread Properties**: All Threads share the same 10-stat foundation that determines how they weave
+- **The Weaving**: All interactions use identical mathematical rules to connect Threads
+- **Thread States**: All temporal changes follow the same patterns across all Threads
 
-This creates **infinite composability**—simple mathematical rules generate limitless unique experiences through emergent complexity.
+This creates **infinite composability**—simple weaving rules generate limitless unique Tapestries through emergent complexity.
 
 ### Death-Driven Emotional Investment
 Unlike traditional roguelikes with quick runs, this game creates **novel-length emotional investment**:
@@ -28,42 +28,42 @@ Unlike traditional roguelikes with quick runs, this game creates **novel-length 
 
 ---
 
-## I. FOUNDATIONAL SYSTEMS
+## I. THE WEAVING SYSTEMS
 
-### Universal Statistical System (USS)
-**The Mathematical DNA of Everything**
+### Thread Properties
+**The Essential Nature of All Threads**
 
-All entities—players, NPCs, regions, stories, items, weather systems—possess the same 10 statistics (0-20 scale):
+All Threads—players, NPCs, regions, Story Weavers, items, weather systems—possess the same 10 properties (0-20 scale):
 
 **Physical**: Strength, Dexterity, Constitution
 **Mental**: Intelligence, Wisdom, Charisma  
 **Social**: Connections, Resources, Reputation
 **Mystical**: Luck
 
-**Key Insight**: When everything shares the same statistical foundation, complex interactions emerge naturally. A thunderstorm's "Charisma" contests against a player's "Wisdom" to determine if they feel awed or terrified. A sword's "Intelligence" grows through combat experience, eventually offering tactical advice.
+**Key Insight**: When all Threads share the same properties, complex weaving emerges naturally. A thunderstorm Thread's "Charisma" contests against a player Thread's "Wisdom" to determine if they feel awed or terrified. A sword Thread's "Intelligence" grows through combat experience, eventually offering tactical advice.
 
-### Universal State System
-**Temporal Dynamics for All Entities**
+### Thread States
+**How Threads Change Over Time**
 
-10 states that modify any entity's capabilities:
+10 states that modify any Thread's weaving capabilities:
 **Negative**: Damaged, Corrupted, Stressed, Neglected
 **Positive**: Enhanced, Experienced, Connected, Prestigious, Blessed, Adapted
 
-**Key Insight**: States flow between entity types. A "Corrupted" region makes items found there more likely to gain Corrupted state. An "Experienced" player weapon remembers successful techniques. States create **temporal continuity** that persists across character deaths.
+**Key Insight**: States flow between Thread types. A "Corrupted" region Thread makes item Threads found there more likely to gain Corrupted state. An "Experienced" player weapon Thread remembers successful techniques. States create **temporal continuity** that The Seamstress preserves across character deaths.
 
-### Universal Contest Resolution
-**Single Mathematical Framework for All Interactions**
+### The Weaving Engine
+**How All Threads Connect Through Mathematics**
 
 **Base Formula**: 50% + (stat_difference × 5%) + d20 + luck_modifier
 
 Whether determining:
 - Combat outcomes (Strength vs Constitution)
-- Social interactions (Charisma vs Wisdom)
-- Story progression (Player Intelligence vs Story Complexity)
-- World generation (Story stats vs Terrain resistance)
+- Social interactions (Charisma vs Wisdom) 
+- Tapestry progression (Player Intelligence vs Story Complexity)
+- World generation (Story Weaver stats vs Terrain Thread resistance)
 - Abandonment resolution (Story autonomy vs World inertia)
 
-**Key Insight**: Using identical mathematics for all interactions ensures consistent, learnable patterns while enabling unexpected emergent behaviors.
+**Key Insight**: Using identical mathematics for all Thread interactions ensures consistent, learnable patterns while enabling unexpected emergent behaviors.
 
 ---
 
@@ -495,6 +495,181 @@ This isn't just another roguelike—it's a demonstration that **mathematical ele
 - **Living World Continuity** through persistent mathematical state systems
 
 The goal is proving that **mathematical consistency** rather than content volume is the key to creating truly dynamic, replayable, emotionally engaging roguelike experiences.
+
+---
+
+## X. INTERFACE & USER EXPERIENCE DESIGN
+
+### Vi-Native Modal Interface
+**Maximum Vi Compatibility for Terminal Roguelike Experience**
+
+The interface is designed to cause Emacs users' heads to explode through pure vi orthodoxy. Every keybinding, modal interaction, and command follows vi conventions precisely.
+
+#### Terminal Interface Layout
+```
+┌──────────────────────────────────────────────────────────────────────────────────────────┐
+│ ▌ Korthak    ♥  23/27  ⚡ Lv3  ⚔ Armed          ⚠ Hostile   ◐ 47% Explored   Night ☾    ▌│
+├──────────────────────────────────────────────────────────────────────────────────────────┤
+│ » You hear faint muttering from the east. The goblin seems agitated.              [3/27] │
+├─ dungeon.lvl3 ───────────────────────────────────────────────────────────────────────────┤
+│██████████████████████████████████████████████████████████████████████████████████████████│
+│█▓▓▓▓▓▓▓█░░░░░░░░░░░░░░░░█▒▒▒▒▒▒▒▒▒▒▒█≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈█▓▓▓▓▓▓▓▓▓█│
+│█▓·····▓█░▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒█▒·········▒█≈·······································≈█▓·······▓█│
+│█▓·····▓█░▒·············▒█▒·········▒█≈·······································≈█▓·······▓█│
+│█▓·····▓█░▒·············▒█▒·········▒█≈···················@···················≈█▓·······▓█│
+│█▓·····▓█░▒·············▒█▒·········▒█≈················G······················≈█▓·······▓█│
+│██████████████████████████████████████████████████████████████████████████████████████████│
+├──────────────────────────────────────────────────────────────────────────────────────────┤
+│ -- NORMAL --                                                                     [67,42] │
+└──────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+#### Extended ASCII Aesthetic
+- **Rich texturing** through varied ASCII shading (█▓▒░≈·)
+- **Room differentiation** via material patterns and visual depth
+- **Clean symbols** for entities (@ player, G goblin) against textured backgrounds
+- **Neovim-inspired** status bars and file-like presentation
+- **Responsive layout** that adapts to user's terminal dimensions
+
+### Universal Action Grammar
+**Consistent Vi-Style Command Structure**
+
+Every action follows the identical pattern for maximum muscle memory efficiency:
+
+```
+[count][which][type][target]
+```
+
+#### Pattern Components:
+- **Count**: Optional number prefix (3, 5, 10)
+- **Which**: Punctuation mark identifying specific item ('  "  ;  ,  /  \  [  ]  -  =)
+- **Type**: Single character for action category
+- **Target**: Direction or area specification
+
+#### Type Categories:
+```
+w = weapons          # 'wh = attack left with weapon '
+s = scrolls          # "sip = use scroll " on self + adjacent  
+k = skills           # ;kiw = use skill ; on self
+m = memorized spells # ,mj = cast memorized spell , down
+c = consumables      # /cap = use consumable / on adjacent area
+e = equipment        # \eh = use equipment \ to left
+```
+
+#### Target Specifications:
+```
+hjkl = directional movement/targeting
+iw   = self (inner word - vi text object)
+ip   = self + adjacent 8 tiles (inner paragraph)
+ap   = adjacent 8 tiles only (a paragraph)
+```
+
+### Universal Mark System
+**Vi Marks for Everything**
+
+Marks provide instant access to locations, items, spells, and abilities using vi's native mark system:
+
+#### Mark Types:
+```
+mx    # set mark x (context-dependent: location, item, spell, skill)
+gx    # goto mark x (pure vi syntax)
+```
+
+#### Mark Categories:
+- **Location marks**: Navigate instantly to marked dungeon positions
+- **Item marks**: Quick access to specific weapons, consumables, equipment
+- **Spell marks**: Memorized spells and scrolls with instant casting
+- **Skill marks**: Abilities like stealth, lockpicking, climbing
+
+#### Mark Pool:
+Each category uses the same 10 punctuation marks: `'  "  ;  ,  /  \  [  ]  -  =`
+Total: 40+ quick-access slots across all categories.
+
+### Modal System
+**Pure Vi Modal Philosophy**
+
+#### Normal Mode (Default):
+- **Movement**: hjkl with count prefixes (5h, 10j)
+- **Actions**: Single-key commands following universal grammar
+- **Marks**: Setting and jumping to marks
+- **Repeat**: `.` repeats last action (sacred vi command)
+
+#### Insert Mode:
+- **Naming**: Items, locations, save files, character notes  
+- **Text entry**: Any situation requiring human-readable labels
+- **Exit**: ESC returns to normal mode
+
+#### Ex Command Mode:
+```
+:help, :h         # help system and documentation
+:quit, :q         # quit game  
+:save, :w         # save game with optional naming
+:messages         # show persistent message history
+:marks            # display all current marks
+:map              # keymap customization (full vi mapping support)
+:set              # configuration and preferences
+```
+
+### Message System
+**Neovim-Style Notifications with Persistent History**
+
+#### Message Display:
+```
+│ ℹ You hear faint muttering from the east.                                          [3/27] │
+│ ⚠ The goblin looks angry!                                                          [2/27] │ 
+│ ✓ You picked up 15 gold pieces.                                                    [1/27] │
+```
+
+#### Message Navigation:
+```
+<C-n>/<C-p>       # next/previous message (neovim-style)
+<C-u>/<C-d>       # page up/down through message history
+/pattern          # search forward in messages (vi search)
+?pattern          # search backward in messages  
+n/N               # next/previous search result
+```
+
+#### Message Features:
+- **Persistent history**: No clearing - messages become part of narrative log
+- **Searchable**: Full vi-style search through entire adventure history
+- **Contextual**: Information, warnings, success indicators with appropriate icons
+- **Turn tracking**: Every message timestamped with turn counter
+
+### Customization System
+**Full Vi Mapping Support**
+
+#### Custom Keymaps:
+```
+:map lh 'wh<CR>              # map lh to attack left with primary weapon
+:map ;; ;miw<CR>             # map ;; to cast ; spell on self  
+:map <F1> :help<CR>          # map function keys
+```
+
+#### Leader Key Support:
+```
+:let mapleader = "\\"        # set leader key
+:map <leader>h :help<CR>     # \h for help
+:map <leader>s :save<CR>     # \s for save
+```
+
+#### Configuration:
+```
+:set cmdheight=2             # show 2 message lines
+:set verbose=1               # show debug messages  
+:set quiet                   # suppress info messages
+```
+
+### Key Design Principles:
+
+1. **Vi Orthodoxy**: Every keybinding and interaction follows vi conventions precisely
+2. **Universal Grammar**: Single pattern for all actions eliminates mental overhead
+3. **Muscle Memory**: Consistent syntax enables automatic responses during complex situations
+4. **Mark Integration**: Vi's mark system extended to all game entities for instant access
+5. **Modal Purity**: Clean separation between action (normal), text entry (insert), and configuration (ex)
+6. **Terminal Native**: Designed specifically for terminal interface with extended ASCII enhancement
+7. **Customizable**: Full vi-style mapping system for personal workflow optimization
+
+**Key Insight**: By embracing vi's interface philosophy completely, the roguelike becomes an extension of the editor experience rather than a separate application, creating unprecedented efficiency for vi users while maintaining the classic terminal roguelike aesthetic through rich extended ASCII presentation.
 
 ---
 

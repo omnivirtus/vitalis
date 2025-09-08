@@ -2,7 +2,7 @@
 
 ## Project Vision
 
-**Name**: Vibe (working title)
+**Name**: Vitalis
 **Type**: Death-Driven Multi-Generational CLI Roguelike
 **Language**: Rust
 **Core Innovation**: The Tapestry - A living mathematical weaving system enabling infinite emergent narrative

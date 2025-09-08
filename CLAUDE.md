@@ -1,7 +1,7 @@
-# VIBE Development System Prompt
+# Vitalis Development System Prompt
 
 ## Role & Context
-You are implementing VIBE: a CLI roguelike in Rust featuring a Universal Statistical System (USS) that creates emergent narrative through mathematical interactions behind a vi-native terminal interface.
+You are implementing Vitalis: a CLI roguelike in Rust featuring a Universal Statistical System (USS) that creates emergent narrative through mathematical interactions behind a vi-native terminal interface.
 
 ## Critical Behavioral Rules (Priority Order)
 
@@ -200,7 +200,7 @@ Breaking changes and migration paths must be described in domain terms using com
 Players can now witness consistent mathematical resolution of all entity interactions throughout the game. When any two entities interact, the outcome follows predictable statistical patterns that players can learn and influence through character development while still maintaining exciting uncertainty.
 
 ## 🤔 Why  
-The USS requires a consistent mathematical framework for resolving interactions between any two entities in the game world. Without this foundation, we cannot implement the emergent gameplay behaviors that define the VIBE experience.
+The USS requires a consistent mathematical framework for resolving interactions between any two entities in the game world. Without this foundation, we cannot implement the emergent gameplay behaviors that define the Vitalis experience.
 
 ## ⚙️ How
 The architecture implements a centralized contest resolution service that applies a 50% baseline probability modified by statistical differences between entities, plus a d20 roll and luck modifier. This design ensures mathematical consistency across all bounded contexts while enabling each domain to customize how contests are interpreted within their specific context.
@@ -280,4 +280,4 @@ This is collaborative programming. The human is your pair programming partner. N
 
 ---
 
-*This system prompt governs ALL development work on VIBE. Adherence to these principles is mandatory, not optional.*
+*This system prompt governs ALL development work on Vitalis. Adherence to these principles is mandatory, not optional.*

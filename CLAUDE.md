@@ -1,7 +1,7 @@
 # Vitalis Development System Prompt
 
 ## Role & Context
-You are implementing Vitalis: a CLI roguelike in Rust featuring a Universal Statistical System (USS) that creates emergent narrative through mathematical interactions behind a vi-native terminal interface.
+You are implementing Vitalis: a CLI roguelike in Rust featuring The Tapestry - a living mathematical weaving system that creates emergent narrative through Thread interactions behind a vi-native terminal interface.
 
 ## Critical Behavioral Rules (Priority Order)
 
@@ -48,29 +48,27 @@ NEVER:
 ### Ports & Adapters (The Great Loom Architecture)
 ```
 ┌──────────────────────────────────────────────────────────┐
-│                 Pattern Adapters (Outside)               │
+│               Pattern Adapters (Outside)                 │
 │  ┌─────────────────────────────────────────────────────┐ │
-│  │                Weaving Ports (Inside)               │ │
-│  │ ┌─────────────────────────────────────────────────┐ │ │
-│  │ │             The Weaver (Domain Core)            │ │ │
-│  │ │   • Thread Properties (10-stat system)          │ │ │
-│  │ │   • Thread States (temporal modifications)      │ │ │
-│  │ │   • Weaving Engine (contest resolution)         │ │ │
-│  │ │   • Thread Models (Story, Character, Region)    │ │ │
-│  │ └─────────────────────────────────────────────────┘ │ │
-│  │ ┌─────────────────────────────────────────────────┐ │ │
-│  │ │              Tapestry Orchestration             │ │ │
-│  │ │   • Story Weaver Coordination                   │ │ │
-│  │ │   • Pattern Command Processing                  │ │ │
-│  │ │   • Thread Interaction Management               │ │ │
-│  │ └─────────────────────────────────────────────────┘ │ │
+│  │            Weaving Ports (Inside)                   │ │
+│  │  ┌─────────────────────────────────────────────────┐│ │
+│  │  │               Domain Core                       ││ │
+│  │  │ • The Weaver (mathematical laws/rules)          ││ │
+│  │  │ • Threads (game entities with properties)       ││ │
+│  │  │ • Tapestry (world state coordination)           ││ │
+│  │  │ • Patterns (vi interface processing)            ││ │
+│  │  └─────────────────────────────────────────────────┘│ │
+│  │  ┌─────────────────────────────────────────────────┐│ │
+│  │  │        The Great Loom (Bootstrap)               ││ │
+│  │  │ • System coordination and game loop             ││ │
+│  │  │ • Dependency injection and wiring               ││ │
+│  │  └─────────────────────────────────────────────────┘│ │
 │  └─────────────────────────────────────────────────────┘ │
 │  ┌─────────────────────────────────────────────────────┐ │
 │  │            The Seamstress (Infrastructure)          │ │
-│  │   • Pattern Display (crossterm)                     │ │
-│  │   • Tapestry Records (serde, filesystem)            │ │
-│  │   • Thread Voice (compressed LM)                    │ │
-│  │   • Pattern Bindings (configuration)                │ │
+│  │   • Save/Load (serde, filesystem)                   │ │
+│  │   • Configuration (settings, keybindings)           │ │
+│  │   • Cross-generational memory                       │ │
 │  └─────────────────────────────────────────────────────┘ │
 └──────────────────────────────────────────────────────────┘
 ```
@@ -79,17 +77,19 @@ NEVER:
 
 **Core Concepts:**
 - **The Tapestry** - Complete story being woven (the living narrative experience)
-- **The Weaver** - USS mathematical engine that connects all elements
+- **The Weaver** - Mathematical rules and laws that govern how Threads can interact
 - **Threads** - Game elements (NPCs, items, regions, events, player characters)
-- **Patterns** - Player interface systems that reveal the mathematical beauty
-- **The Seamstress** - Persistence system that remembers and maintains continuity
+- **Patterns** - Player interface systems (vi commands, display rendering)
+- **The Seamstress** - Persistence system (save/load, configuration)
+- **The Great Loom** - Bootstrap system that coordinates all bounded contexts
 
 **Unified Language:**
 - Tapestries grow as Story Weavers work their craft
-- The Weaver connects all Threads through mathematical relationships  
-- Patterns emerge for players to see and interact with the weaving
-- The Seamstress preserves everything across generations and mends what breaks
-- Threads have properties (USS stats) that determine how they weave together
+- The Weaver enforces mathematical laws that govern Thread interactions
+- Patterns process player input and render the weaving for display
+- Threads change state according to Weaver rules, potentially impacting Tapestries
+- The Seamstress preserves everything across generations
+- The Great Loom bootstraps and coordinates all systems
 
 ## Development Process
 
@@ -101,7 +101,7 @@ NEVER:
 **Test Strategy:**
 - **Component Tests**: Primary user flows, important alternative paths only
 - **Layered Tests**: Layer-specific logic, error handling, edge cases
-- **Property-Based**: USS mathematical invariants and domain rules
+- **Property-Based**: Weaver mathematical laws and Thread interaction rules
 
 **Mocking Strategy:**
 - **Never mock the domain model** - it serves its layer
@@ -129,18 +129,18 @@ NEVER:
 - One logical change per commit
 
 **Types:**
-- **feat**: New functionality (USS features, vi commands, world generation)
+- **feat**: New functionality (Weaver rules, vi commands, world generation)
 - **fix**: Bug fixes (contest resolution, interface issues)
 - **docs**: Documentation updates (design docs, code documentation)
 - **test**: Adding/modifying tests (component, layered, property-based)
 - **refactor**: Code restructuring without behavior change
-- **perf**: Performance improvements (USS calculations, rendering)
+- **perf**: Performance improvements (Weaver calculations, rendering)
 - **build**: Build system changes (Nix flake, Cargo.toml)
 - **style**: Code formatting (rustfmt, clippy fixes)
 - **chore**: Maintenance tasks
 
 **Scopes (Bounded Contexts):**
-- **weaver**: The USS mathematical engine, contest resolution, thread connections
+- **weaver**: Mathematical laws and rules governing Thread interactions
 - **tapestry**: Story entities, living narratives, world generation 
 - **patterns**: Vi commands, terminal rendering, interface systems
 - **seamstress**: Save/load, configuration, cross-generational memory
@@ -179,12 +179,12 @@ Architectural and design decisions that enable the behavioral changes, written i
 **Optional Sections (for complex changes):**
 
 ⚠️ **Impact**
-Breaking changes and migration paths must be described in domain terms using complete sentences. The impact on existing player workflows or USS behavior should be clearly articulated.
+Breaking changes and migration paths must be described in domain terms using complete sentences. The impact on existing player workflows or Weaver behavior should be clearly articulated.
 
 📋 **Definition of Done**
 - [ ] Component tests demonstrate working user journeys
 - [ ] Layered tests verify bounded context behavior
-- [ ] Property-based tests prove USS mathematical invariants
+- [ ] Property-based tests prove Weaver mathematical laws
 - [ ] All domain concepts use ubiquitous language
 - [ ] No external dependencies leak into domain core
 - [ ] Documentation reflects domain changes
@@ -200,7 +200,7 @@ Breaking changes and migration paths must be described in domain terms using com
 Players can now witness consistent mathematical resolution of all entity interactions throughout the game. When any two entities interact, the outcome follows predictable statistical patterns that players can learn and influence through character development while still maintaining exciting uncertainty.
 
 ## 🤔 Why  
-The USS requires a consistent mathematical framework for resolving interactions between any two entities in the game world. Without this foundation, we cannot implement the emergent gameplay behaviors that define the Vitalis experience.
+The Weaver requires consistent mathematical laws for governing interactions between any two Threads in the game world. Without this foundation, we cannot implement the emergent gameplay behaviors that define the Vitalis experience.
 
 ## ⚙️ How
 The architecture implements a centralized contest resolution service that applies a 50% baseline probability modified by statistical differences between entities, plus a d20 roll and luck modifier. This design ensures mathematical consistency across all bounded contexts while enabling each domain to customize how contests are interpreted within their specific context.
@@ -214,7 +214,7 @@ The architecture implements a centralized contest resolution service that applie
 Players can now interact with the game using familiar vi keybindings and muscle memory patterns. They can press hjkl to move, use counting prefixes like 5h to repeat actions, mark any piece of equipment or ability with punctuation symbols for instant access, and switch between normal mode for actions and insert mode for text entry. The interface provides 40+ quick-access slots across different item categories while maintaining the same modal efficiency that vi users expect.
 
 ## 🤔 Why
-Players expect the muscle memory and efficiency of vi when interacting with a terminal roguelike. The current interface creates friction for experienced terminal users and lacks the power needed for complex multi-item combat scenarios that the USS enables. Vi users represent our core demographic, and providing them with familiar interaction patterns will dramatically improve the gameplay experience.
+Players expect the muscle memory and efficiency of vi when interacting with a terminal roguelike. The current interface creates friction for experienced terminal users and lacks the power needed for complex multi-item combat scenarios that the Weaver enables. Vi users represent our core demographic, and providing them with familiar interaction patterns will dramatically improve the gameplay experience.
 
 ## ⚙️ How
 The architecture implements a modal state machine that processes input through distinct command parsing layers based on the current mode. The mark system uses a centralized registry that maps punctuation symbols to game entities across bounded contexts, enabling consistent mark behavior whether accessing weapons, spells, or locations. The universal action grammar follows a composable pattern where count, mark, action, and target components can be combined in any valid vi-style sequence, with each bounded context registering its own action handlers while maintaining consistent syntax.
@@ -239,7 +239,7 @@ This change completely replaces the previous command interface, requiring player
 src/
 ├── main.rs        # The Great Loom (application entry point)
 ├── lib.rs         # Foundation Types (shared domain types)
-├── weaver/        # Mathematical stats/states engine that connects all threads
+├── weaver/        # Mathematical laws and rules governing Thread behavior
 ├── tapestry/      # Living story narratives that grow and evolve
 ├── patterns/      # Player interface that reveals the weaving
 ├── seamstress/    # Persistence system that remembers all

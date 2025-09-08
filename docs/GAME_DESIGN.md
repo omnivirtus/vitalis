@@ -121,7 +121,7 @@ Weather systems have their own stats and contest against players, biomes, and ea
 ### Living World Memory System
 **Environmental Archaeology**
 
-The world remembers through the Universal State System:
+The world remembers through Thread States:
 - **Regions** gain states based on player actions (a battlefield becomes "Damaged," a saved village becomes "Blessed")
 - **Items** develop consciousness through experience states ("Experienced" weapons remember successful techniques)
 - **NPCs** carry generational memory through "Connected" and "Prestigious" states
@@ -412,7 +412,7 @@ Character death triggers optional comprehensive data export:
 - World evolution tracking across generations
 - Relationship network analysis and social impact measurement
 
-**Key Insight**: The interface becomes part of the Universal State System, evolving based on mathematical interactions. Post-game analysis transforms individual playthroughs into **generational family sagas** with comprehensive data archaeology.
+**Key Insight**: The interface becomes part of the Thread State system, evolving based on mathematical interactions. Post-game analysis transforms individual playthroughs into **generational family sagas** with comprehensive data archaeology.
 
 ---
 
@@ -449,7 +449,7 @@ Traditional roguelikes create variety through content multiplication (more monst
 
 - **Domain-Driven Design**: Code structure reflects mathematical relationships, not technical concerns
 - **Test-Driven Development**: Every mathematical relationship validated through comprehensive testing
-- **Universal Abstractions**: Single implementations for Universal Statistical System, Contest Resolution, and State Management
+- **Universal Abstractions**: Single implementations for Thread Properties, Weaver Laws, and Thread States
 - **Emergent Complexity**: Build simple mathematical rules, let complex behaviors emerge
 
 ### System Integration Philosophy

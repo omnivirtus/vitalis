@@ -1,4 +1,4 @@
-use portable_pty::{native_pty_system, CommandBuilder, PtySize};
+use portable_pty::{CommandBuilder, PtySize, native_pty_system};
 use std::io::{Read, Write};
 use std::time::{Duration, Instant};
 
@@ -6,191 +6,226 @@ use std::time::{Duration, Instant};
 /// Tests the actual vitalis binary by spawning it in a PTY and sending hjkl inputs
 #[test]
 fn player_moves_in_square_returning_to_origin() {
-    // Create a PTY with fixed size (80x24 like classic terminal)
-    let pty_system = native_pty_system();
-    let pty_pair = pty_system
-        .openpty(PtySize {
-            rows: 24,
-            cols: 80,
-            pixel_width: 0,
-            pixel_height: 0,
-        })
-        .expect("Failed to create PTY");
+    const CENTER_X: usize = 39; // 0-indexed center of 80-wide terminal
+    const CENTER_Y: usize = 10; // 0-indexed center of 21-line game area
+    const STATUS_ROW: usize = 22; // Middle of 3-line status bar
 
-    // Build command to run our vitalis binary
-    let mut cmd = CommandBuilder::new(env!("CARGO_BIN_EXE_vitalis"));
-    let mut child = pty_pair
-        .slave
-        .spawn_command(cmd)
-        .expect("Failed to spawn vitalis");
+    let mut game = VitalisGame::start();
+    let screen = game.get_screen();
 
-    let mut reader = pty_pair.master.try_clone_reader().unwrap();
-    let mut writer = pty_pair.master.take_writer().unwrap();
+    expect_screen_box(
+        &screen,
+        ((CENTER_X, CENTER_Y), (CENTER_X, CENTER_Y)),
+        &[&['@']],
+    )
+    .expect("Player should start at center position");
 
-    // Give the app time to initialize
-    std::thread::sleep(Duration::from_millis(100));
+    expect_screen_box(
+        &screen,
+        ((74, STATUS_ROW), (78, STATUS_ROW)),
+        &[&"[0,0]".chars().collect::<Vec<_>>()],
+    )
+    .expect("Initial coordinates should be [0,0]");
 
-    // Read initial screen state
-    let initial_output = read_with_timeout(&mut reader, Duration::from_millis(500));
-    println!("Initial screen:\n{}", initial_output);
+    expect_screen_box(
+        &screen,
+        ((0, STATUS_ROW), (11, STATUS_ROW)),
+        &[&"-- NORMAL --".chars().collect::<Vec<_>>()],
+    )
+    .expect("Should start in NORMAL mode");
 
-    // Parse the screen output into lines for position-based testing
-    let screen_lines: Vec<&str> = initial_output.lines().collect();
-
-    // Terminal layout: 80x24 with 3-line status bar at bottom
-    // Game area: lines 0-20 (21 lines), Status area: lines 21-23 (3 lines)
-    // Player starts at center of game area: (40, 10) - middle of 80-wide, 21-high area
-    let game_area_width = 80;
-    let game_area_height = 24 - 3; // 24 total - 3 status lines
-    let center_x = game_area_width / 2; // 40 (0-indexed: 39)
-    let center_y = game_area_height / 2; // 10 (0-indexed: 10)
-
-    assert!(
-        screen_lines.len() >= 24,
-        "Expected exactly 24 lines of output (21 game + 3 status). Got: {}",
-        screen_lines.len()
-    );
-
-    // Verify player '@' symbol appears at center of game area
-    let game_line = screen_lines[center_y];
-    assert!(
-        game_line.len() > center_x,
-        "Expected line {} to have at least {} characters for center position. Got: '{}'",
-        center_y,
-        center_x + 1,
-        game_line
-    );
-
-    let char_at_center = game_line.chars().nth(center_x);
-    assert!(
-        char_at_center == Some('@'),
-        "Expected '@' at center position ({},{}) but found {:?}. Line: '{}'",
-        center_x,
-        center_y,
-        char_at_center,
-        game_line
-    );
-
-    // Verify 3-line status bar: middle line (line 22) contains mode and coordinates
-    // Mode on far left, coordinates on far right
-    let status_line = screen_lines[22]; // Middle of 3-line status (lines 21, 22, 23)
-    assert!(
-        status_line.starts_with("-- NORMAL --"),
-        "Expected status line to start with '-- NORMAL --' on far left. Got: '{}'",
-        status_line
-    );
-    assert!(
-        status_line.trim_end().ends_with("[0,0]"),
-        "Expected status line to end with '[0,0]' on far right. Got: '{}'",
-        status_line
-    );
-
-    // Execute square movement from center: left(h) -> down(j) -> right(l) -> up(k)
-    // Player starts at center (40, 10) with game coordinates (0, 0)
     let moves = [
-        ('h', "left", center_x - 1, center_y, "[-1,0]"), // Move left: @ at screen (39, 10)
-        ('j', "down", center_x - 1, center_y + 1, "[-1,1]"), // Move down: @ at screen (39, 11)
-        ('l', "right", center_x, center_y + 1, "[0,1]"), // Move right: @ at screen (40, 11)
-        ('k', "up", center_x, center_y, "[0,0]"),        // Move up: @ back to screen (40, 10)
+        ('h', CENTER_X - 1, CENTER_Y, "[-1,0]"),
+        ('j', CENTER_X - 1, CENTER_Y + 1, "[-1,1]"),
+        ('l', CENTER_X, CENTER_Y + 1, "[0,1]"),
+        ('k', CENTER_X, CENTER_Y, "[0,0]"),
     ];
+    for (key, x, y, coords) in moves.iter() {
+        let screen = game.send_key(*key);
 
-    for (i, (key, direction, expected_screen_x, expected_screen_y, expected_coords)) in
-        moves.iter().enumerate()
-    {
-        println!("\nMove {}: {} ({})", i + 1, direction, key);
+        expect_screen_box(&screen, ((*x, *y), (*x, *y)), &[&['@']])
+            .unwrap_or_else(|e| panic!("After {}: {}", key, e));
 
-        // Send the movement key
-        writer.write_all(&[*key as u8]).expect("Failed to send key");
-        writer.flush().expect("Failed to flush");
+        expect_screen_box(
+            &screen,
+            ((75, STATUS_ROW), (78, STATUS_ROW)),
+            &[&coords.chars().collect::<Vec<_>>()],
+        )
+        .unwrap_or_else(|e| panic!("After {}: coordinate display error: {}", key, e));
 
-        // Wait for screen update and read output
+        expect_screen_box(
+            &screen,
+            ((0, STATUS_ROW), (11, STATUS_ROW)),
+            &[&"-- NORMAL --".chars().collect::<Vec<_>>()],
+        )
+        .unwrap_or_else(|e| panic!("After {}: mode display error: {}", key, e));
+    }
+
+    game.quit();
+}
+
+// ============================================================================
+// Supporting Implementation Details
+// ============================================================================
+
+/// Game management wrapper for PTY-based testing
+struct VitalisGame {
+    _child: Box<dyn portable_pty::Child + Send + Sync>,
+    reader: Box<dyn Read + Send>,
+    writer: Box<dyn Write + Send>,
+}
+
+impl VitalisGame {
+    /// Start vitalis game in PTY and return management wrapper
+    fn start() -> Self {
+        let pty_system = native_pty_system();
+        let pty_pair = pty_system
+            .openpty(PtySize {
+                rows: 24,
+                cols: 80,
+                pixel_width: 0,
+                pixel_height: 0,
+            })
+            .expect("Failed to create PTY");
+
+        let cmd = CommandBuilder::new(env!("CARGO_BIN_EXE_vitalis"));
+        let child = pty_pair
+            .slave
+            .spawn_command(cmd)
+            .expect("Failed to spawn vitalis");
+
+        let reader = pty_pair.master.try_clone_reader().unwrap();
+        let writer = pty_pair.master.take_writer().unwrap();
+
+        // Give the app time to initialize
+        std::thread::sleep(Duration::from_millis(100));
+
+        Self {
+            _child: child,
+            reader,
+            writer,
+        }
+    }
+
+    /// Get current screen output
+    fn get_screen(&mut self) -> String {
+        read_with_timeout(&mut self.reader, Duration::from_millis(500))
+    }
+
+    /// Send a single key and wait for response
+    fn send_key(&mut self, key: char) -> String {
+        self.writer
+            .write_all(&[key as u8])
+            .expect("Failed to send key");
+        self.writer.flush().expect("Failed to flush");
         std::thread::sleep(Duration::from_millis(50));
-        let output = read_with_timeout(&mut reader, Duration::from_millis(200));
-
-        println!("Screen after move {}:\n{}", i + 1, output);
-
-        // Parse screen into lines for position testing
-        let screen_lines: Vec<&str> = output.lines().collect();
-
-        // Verify player '@' symbol appears at expected screen position
-        assert!(
-            screen_lines.len() > *expected_screen_y,
-            "After move {} ({}): expected at least {} lines for row {}. Got: {}",
-            i + 1,
-            direction,
-            expected_screen_y + 1,
-            expected_screen_y,
-            screen_lines.len()
-        );
-
-        let target_line = screen_lines[*expected_screen_y];
-        assert!(
-            target_line.len() > *expected_screen_x,
-            "After move {} ({}): expected line {} to have at least {} characters. Got: '{}'",
-            i + 1,
-            direction,
-            expected_screen_y,
-            expected_screen_x + 1,
-            target_line
-        );
-
-        let char_at_position = target_line.chars().nth(*expected_screen_x);
-        assert!(
-            char_at_position == Some('@'),
-            "After move {} ({}): expected '@' at screen position ({},{}) but found {:?}. Line: '{}'", 
-            i + 1, direction, expected_screen_x, expected_screen_y, char_at_position, target_line
-        );
-
-        // Verify status line (middle of 3-line status bar) shows correct game coordinates
-        assert!(
-            screen_lines.len() > 22,
-            "After move {} ({}): expected at least 23 lines for status. Got: {}",
-            i + 1,
-            direction,
-            screen_lines.len()
-        );
-        let status_line = screen_lines[22]; // Middle status line (line 22 of lines 21, 22, 23)
-        assert!(
-            status_line.trim_end().ends_with(expected_coords),
-            "After move {} ({}): expected status line to end with '{}'. Got: '{}'",
-            i + 1,
-            direction,
-            expected_coords,
-            status_line
-        );
-
-        // Verify NORMAL mode maintained on far left of status line
-        assert!(
-            status_line.starts_with("-- NORMAL --"),
-            "After move {} ({}): expected status to start with '-- NORMAL --'. Got: '{}'",
-            i + 1,
-            direction,
-            status_line
-        );
+        read_with_timeout(&mut self.reader, Duration::from_millis(200))
     }
 
-    // Send :quit command to cleanly exit
-    writer.write_all(b":quit\r").expect("Failed to send :quit");
-    writer.flush().expect("Failed to flush");
+    /// Send quit command and clean up
+    fn quit(mut self) {
+        self.writer
+            .write_all(b":quit\r")
+            .expect("Failed to send :quit");
+        self.writer.flush().expect("Failed to flush");
+        // Note: Child cleanup handled by Drop
+    }
+}
 
-    // Wait for clean exit (or timeout after 1 second)
-    let exit_timeout = Duration::from_secs(1);
-    let start_time = Instant::now();
+/// Extract 2D character matrix from screen output for specified bounding box
+fn extract_screen_box(
+    screen: &str,
+    bounds: ((usize, usize), (usize, usize)),
+) -> Result<Vec<Vec<char>>, String> {
+    let lines: Vec<&str> = screen.lines().collect();
+    let ((start_col, start_row), (end_col, end_row)) = bounds;
 
-    loop {
-        if let Ok(Some(_)) = child.try_wait() {
-            println!("✅ Vitalis exited cleanly");
-            break;
-        }
-        if start_time.elapsed() > exit_timeout {
-            println!("⚠️  Timeout waiting for exit, killing process");
-            child.kill().ok();
-            break;
-        }
-        std::thread::sleep(Duration::from_millis(10));
+    if start_row > end_row || start_col > end_col {
+        return Err(format!(
+            "Invalid bounding box: top_left({},{}) must be <= bottom_right({},{})",
+            start_col, start_row, end_col, end_row
+        ));
     }
 
-    println!("✅ Test passed: Player successfully moved in square pattern and returned to origin!");
+    if end_row >= lines.len() {
+        return Err(format!(
+            "Row {} out of bounds. Screen has {} lines",
+            end_row,
+            lines.len(),
+        ));
+    }
+
+    let mut result = Vec::new();
+    for row in start_row..=end_row {
+        let line = lines[row];
+        if end_col >= line.len() {
+            return Err(format!(
+                "Column {} out of bounds on row {}. Line has {} characters: '{}'",
+                end_col,
+                row,
+                line.len(),
+                line
+            ));
+        }
+
+        let row_chars: Vec<char> = line
+            .chars()
+            .skip(start_col)
+            .take(end_col - start_col + 1)
+            .collect();
+        result.push(row_chars);
+    }
+
+    Ok(result)
+}
+
+/// Verify that a screen region matches expected 2D character matrix
+fn expect_screen_box(
+    screen: &str,
+    bounds: ((usize, usize), (usize, usize)),
+    expected: &[&[char]],
+) -> Result<(), String> {
+    let actual = extract_screen_box(screen, bounds)?;
+    let (top_left, bottom_right) = bounds;
+
+    if actual.len() != expected.len() {
+        return Err(format!(
+            "Row count mismatch at {:?}-{:?}: expected {} rows, got {}",
+            top_left,
+            bottom_right,
+            expected.len(),
+            actual.len()
+        ));
+    }
+
+    for (row_idx, (actual_row, expected_row)) in actual.iter().zip(expected.iter()).enumerate() {
+        if actual_row.len() != expected_row.len() {
+            return Err(format!(
+                "Column count mismatch at row {}: expected {} cols, got {}",
+                row_idx,
+                expected_row.len(),
+                actual_row.len()
+            ));
+        }
+
+        for (col_idx, (actual_char, expected_char)) in
+            actual_row.iter().zip(expected_row.iter()).enumerate()
+        {
+            if actual_char != expected_char {
+                return Err(format!(
+                    "Character mismatch at ({},{}) in box {:?}-{:?}: expected '{}', got '{}'",
+                    top_left.0 + col_idx,
+                    top_left.1 + row_idx,
+                    top_left,
+                    bottom_right,
+                    expected_char,
+                    actual_char
+                ));
+            }
+        }
+    }
+
+    Ok(())
 }
 
 /// Read from PTY with timeout to avoid hanging on incomplete output

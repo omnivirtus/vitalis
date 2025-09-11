@@ -44,29 +44,25 @@ fn player_moves_in_square_returning_to_origin() {
         let screen = game.send_key(*key);
 
         expect_screen_box(&screen, ((*x, *y), (*x, *y)), &[&['@']])
-            .unwrap_or_else(|e| panic!("After {}: {}", key, e));
+            .unwrap_or_else(|e| panic!("After {}: charater error {}", key, e));
 
         expect_screen_box(
             &screen,
             ((75, STATUS_ROW), (78, STATUS_ROW)),
             &[&coords.chars().collect::<Vec<_>>()],
         )
-        .unwrap_or_else(|e| panic!("After {}: coordinate display error: {}", key, e));
+        .unwrap_or_else(|e| panic!("After {}: coordinate error: {}", key, e));
 
         expect_screen_box(
             &screen,
             ((0, STATUS_ROW), (11, STATUS_ROW)),
             &[&"-- NORMAL --".chars().collect::<Vec<_>>()],
         )
-        .unwrap_or_else(|e| panic!("After {}: mode display error: {}", key, e));
+        .unwrap_or_else(|e| panic!("After {}: mode error: {}", key, e));
     }
 
     game.quit();
 }
-
-// ============================================================================
-// Supporting Implementation Details
-// ============================================================================
 
 /// Game management wrapper for PTY-based testing
 struct VitalisGame {
@@ -97,7 +93,6 @@ impl VitalisGame {
         let reader = pty_pair.master.try_clone_reader().unwrap();
         let writer = pty_pair.master.take_writer().unwrap();
 
-        // Give the app time to initialize
         std::thread::sleep(Duration::from_millis(100));
 
         Self {
@@ -132,6 +127,20 @@ impl VitalisGame {
     }
 }
 
+/// Verify that a screen region matches expected 2D character matrix
+fn expect_screen_box(
+    screen: &str,
+    bounds: ((usize, usize), (usize, usize)),
+    expected: &[&[char]],
+) -> Result<(), String> {
+    let actual = extract_screen_box(screen, bounds)?;
+
+    validate_matrix_dimensions(&actual, expected, bounds)?;
+    compare_matrices(&actual, expected, bounds)?;
+
+    Ok(())
+}
+
 /// Extract 2D character matrix from screen output for specified bounding box
 fn extract_screen_box(
     screen: &str,
@@ -140,52 +149,22 @@ fn extract_screen_box(
     let lines: Vec<&str> = screen.lines().collect();
     let ((start_col, start_row), (end_col, end_row)) = bounds;
 
-    if start_row > end_row || start_col > end_col {
-        return Err(format!(
-            "Invalid bounding box: top_left({},{}) must be <= bottom_right({},{})",
-            start_col, start_row, end_col, end_row
-        ));
-    }
+    let content_width = lines.iter().map(|line| line.len()).max().unwrap_or(0);
+    let content_height = lines.len();
 
-    if end_row >= lines.len() {
-        return Err(format!(
-            "Row {} out of bounds. Screen has {} lines",
-            end_row,
-            lines.len(),
-        ));
-    }
+    validate_bounds(bounds, (content_width, content_height))?;
 
-    let mut result = Vec::new();
-    for row in start_row..=end_row {
-        let line = lines[row];
-        if end_col >= line.len() {
-            return Err(format!(
-                "Column {} out of bounds on row {}. Line has {} characters: '{}'",
-                end_col,
-                row,
-                line.len(),
-                line
-            ));
-        }
-
-        let row_chars: Vec<char> = line
-            .chars()
-            .skip(start_col)
-            .take(end_col - start_col + 1)
-            .collect();
-        result.push(row_chars);
-    }
-
-    Ok(result)
+    (start_row..=end_row)
+        .map(|row| extract_row_chars(lines[row], start_col, end_col))
+        .collect()
 }
 
-/// Verify that a screen region matches expected 2D character matrix
-fn expect_screen_box(
-    screen: &str,
-    bounds: ((usize, usize), (usize, usize)),
+/// Validate that two 2D character matrices have the same dimensions
+fn validate_matrix_dimensions(
+    actual: &[Vec<char>],
     expected: &[&[char]],
+    bounds: ((usize, usize), (usize, usize)),
 ) -> Result<(), String> {
-    let actual = extract_screen_box(screen, bounds)?;
     let (top_left, bottom_right) = bounds;
 
     if actual.len() != expected.len() {
@@ -207,17 +186,28 @@ fn expect_screen_box(
                 actual_row.len()
             ));
         }
+    }
 
+    Ok(())
+}
+
+/// Compare two 2D character matrices for character-by-character equality
+fn compare_matrices(
+    actual: &[Vec<char>],
+    expected: &[&[char]],
+    bounds: ((usize, usize), (usize, usize)),
+) -> Result<(), String> {
+    let (top_left, _bottom_right) = bounds;
+
+    for (row_idx, (actual_row, expected_row)) in actual.iter().zip(expected.iter()).enumerate() {
         for (col_idx, (actual_char, expected_char)) in
             actual_row.iter().zip(expected_row.iter()).enumerate()
         {
             if actual_char != expected_char {
                 return Err(format!(
-                    "Character mismatch at ({},{}) in box {:?}-{:?}: expected '{}', got '{}'",
+                    "Character mismatch at ({},{}): expected '{}', got '{}'",
                     top_left.0 + col_idx,
                     top_left.1 + row_idx,
-                    top_left,
-                    bottom_right,
                     expected_char,
                     actual_char
                 ));
@@ -226,6 +216,56 @@ fn expect_screen_box(
     }
 
     Ok(())
+}
+
+/// Validate bounding box coordinates against content dimensions
+fn validate_bounds(
+    bounds: ((usize, usize), (usize, usize)),
+    content_size: (usize, usize), // (width, height)
+) -> Result<(), String> {
+    let ((start_col, start_row), (end_col, end_row)) = bounds;
+    let (content_width, content_height) = content_size;
+
+    if start_row > end_row || start_col > end_col {
+        return Err(format!(
+            "Invalid bounding box: top_left({},{}) must be <= bottom_right({},{})",
+            start_col, start_row, end_col, end_row
+        ));
+    }
+
+    if end_row >= content_height {
+        return Err(format!(
+            "Row {} out of bounds. Content has {} lines",
+            end_row, content_height
+        ));
+    }
+
+    if end_col >= content_width {
+        return Err(format!(
+            "Column {} out of bounds. Content has {} columns",
+            end_col, content_width
+        ));
+    }
+
+    Ok(())
+}
+
+/// Extract characters from a single line within column bounds
+fn extract_row_chars(line: &str, start_col: usize, end_col: usize) -> Result<Vec<char>, String> {
+    if end_col >= line.len() {
+        return Err(format!(
+            "Column {} out of bounds. Line has {} characters: '{}'",
+            end_col,
+            line.len(),
+            line
+        ));
+    }
+
+    Ok(line
+        .chars()
+        .skip(start_col)
+        .take(end_col - start_col + 1)
+        .collect())
 }
 
 /// Read from PTY with timeout to avoid hanging on incomplete output
@@ -239,14 +279,12 @@ fn read_with_timeout(reader: &mut Box<dyn Read + Send>, timeout: Duration) -> St
             break;
         }
 
-        // Try to read without blocking
         match reader.read(&mut buffer) {
             Ok(0) => break, // EOF
             Ok(n) => {
                 let chunk = String::from_utf8_lossy(&buffer[..n]);
                 output.push_str(&chunk);
 
-                // If we got some output, continue reading for a bit more
                 std::thread::sleep(Duration::from_millis(10));
             }
             Err(err) if err.kind() == std::io::ErrorKind::WouldBlock => {
@@ -262,3 +300,4 @@ fn read_with_timeout(reader: &mut Box<dyn Read + Send>, timeout: Duration) -> St
 
     output
 }
+

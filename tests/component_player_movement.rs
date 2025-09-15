@@ -35,16 +35,20 @@ fn player_moves_in_square_returning_to_origin() {
     .expect("Should start in NORMAL mode");
 
     let moves = [
-        ('h', CENTER_X - 1, CENTER_Y, "[-1,0]"),
-        ('j', CENTER_X - 1, CENTER_Y + 1, "[-1,1]"),
-        ('l', CENTER_X, CENTER_Y + 1, "[0,1]"),
-        ('k', CENTER_X, CENTER_Y, "[0,0]"),
+        ('h', "[-1,0]"),
+        ('j', "[-1,1]"),
+        ('l', "[0,1]"),
+        ('k', "[0,0]"),
     ];
-    for (key, x, y, coords) in moves.iter() {
+    for (key, coords) in moves.iter() {
         let screen = game.send_key(*key);
 
-        expect_screen_box(&screen, ((*x, *y), (*x, *y)), &[&['@']])
-            .unwrap_or_else(|e| panic!("After {}: charater error {}", key, e));
+        expect_screen_box(
+            &screen,
+            ((CENTER_X, CENTER_Y), (CENTER_X, CENTER_Y)),
+            &[&['@']],
+        )
+        .unwrap_or_else(|e| panic!("After {}: player should stay centered: {}", key, e));
 
         expect_screen_box(
             &screen,
@@ -300,4 +304,3 @@ fn read_with_timeout(reader: &mut Box<dyn Read + Send>, timeout: Duration) -> St
 
     output
 }
-

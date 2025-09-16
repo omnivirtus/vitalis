@@ -70,7 +70,7 @@ fn player_moves_in_square_returning_to_origin() {
 
 /// Game management wrapper for PTY-based testing
 struct VitalisGame {
-    _child: Box<dyn portable_pty::Child + Send + Sync>,
+    child: Box<dyn portable_pty::Child + Send + Sync>,
     reader: Box<dyn Read + Send>,
     writer: Box<dyn Write + Send>,
 }
@@ -100,7 +100,7 @@ impl VitalisGame {
         std::thread::sleep(Duration::from_millis(100));
 
         Self {
-            _child: child,
+            child,
             reader,
             writer,
         }
@@ -127,7 +127,12 @@ impl VitalisGame {
             .write_all(b":quit\r")
             .expect("Failed to send :quit");
         self.writer.flush().expect("Failed to flush");
-        // Note: Child cleanup handled by Drop
+    }
+}
+
+impl Drop for VitalisGame {
+    fn drop(&mut self) {
+        let _ = self.child.kill();
     }
 }
 

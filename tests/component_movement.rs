@@ -40,12 +40,72 @@ fn player_can_move_with_hjkl_commands() {
     );
 }
 
+#[test]
+fn player_quits_with_colon_q_command() {
+    let mut game = VitalisGame::start();
+
+    // Pressing 'q' alone should NOT quit (it's just a key)
+    game.press('q');
+    assert!(game.is_running(), "Game should still be running after 'q' key");
+
+    // Enter command mode with ':'
+    game.press(':');
+
+    // Type 'q'
+    game.press('q');
+
+    // Press Enter to execute
+    game.press('\r');
+
+    // Give the game time to process quit and exit
+    std::thread::sleep(Duration::from_millis(500));
+
+    assert!(!game.is_running(), "Game should quit after :q command");
+}
+
+#[test]
+fn player_quits_with_colon_quit_command() {
+    let mut game = VitalisGame::start();
+
+    // Enter command mode and type full 'quit' command
+    game.press(':');
+    game.type_text("quit");
+    game.press('\r');
+
+    // Give the game time to process quit and exit
+    std::thread::sleep(Duration::from_millis(500));
+
+    assert!(!game.is_running(), "Game should quit after :quit command");
+}
+
+#[test]
+fn player_can_backspace_in_ex_mode() {
+    let mut game = VitalisGame::start();
+
+    // Enter command mode
+    game.press(':');
+
+    // Type 'quit' then backspace twice to get 'qu'
+    game.type_text("quit");
+    game.press('\x7f'); // Backspace (DEL character)
+    game.press('\x7f'); // Backspace (DEL character)
+
+    // Now type 'it' again to complete 'quit'
+    game.type_text("it");
+    game.press('\r');
+
+    // Give the game time to process quit and exit
+    std::thread::sleep(Duration::from_millis(500));
+
+    assert!(!game.is_running(), "Game should quit after typing :quit with backspaces");
+}
+
 /// Test harness for running and interacting with the Vitalis game
 struct VitalisGame {
     screen: ScreenBuffer,
     writer: Box<dyn Write + Send>,
     reader: Box<dyn Read + Send>,
-    _child: Box<dyn portable_pty::Child + Send + Sync>,
+    child: Box<dyn portable_pty::Child + Send + Sync>,
 }
 
 impl VitalisGame {
@@ -79,7 +139,7 @@ impl VitalisGame {
             screen,
             writer,
             reader,
-            _child: child,
+            child,
         }
     }
 
@@ -93,18 +153,60 @@ impl VitalisGame {
         self.screen.update(&mut self.reader);
     }
 
+    fn type_text(&mut self, text: &str) {
+        self.writer
+            .write_all(text.as_bytes())
+            .expect("Failed to send text");
+        self.writer.flush().expect("Failed to flush");
+
+        std::thread::sleep(INPUT_PROCESSING_DELAY);
+        self.screen.update(&mut self.reader);
+    }
+
     fn world_position(&self) -> (i32, i32) {
         extract_world_position(&self.screen.get_screen())
             .expect("Could not find player position in status bar")
     }
+
+    fn is_running(&mut self) -> bool {
+        // Game is running if the child process hasn't exited
+        match self.child.try_wait() {
+            Ok(Some(_)) => false, // Process has exited
+            Ok(None) => true,      // Process still running
+            Err(_) => false,       // Error checking status, assume not running
+        }
+    }
+
+    fn screen_text(&self) -> String {
+        let screen = self.screen.get_screen();
+        screen
+            .iter()
+            .map(|row| row.iter().collect::<String>())
+            .collect::<Vec<_>>()
+            .join("\n")
+    }
+}
+
+fn find_char(screen: &[Vec<char>], target: char) -> Option<(usize, usize)> {
+    for (row_idx, row) in screen.iter().enumerate() {
+        for (col_idx, &ch) in row.iter().enumerate() {
+            if ch == target {
+                return Some((col_idx, row_idx));
+            }
+        }
+    }
+    None
 }
 
 impl Drop for VitalisGame {
     fn drop(&mut self) {
-        // Attempt graceful quit
-        let _ = self.writer.write_all(b"q");
+        // Attempt graceful quit with :q command
+        let _ = self.writer.write_all(b":q\r");
         let _ = self.writer.flush();
         std::thread::sleep(Duration::from_millis(100));
+
+        // Force kill if still running
+        let _ = self.child.kill();
     }
 }
 

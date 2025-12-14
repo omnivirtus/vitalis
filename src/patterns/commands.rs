@@ -37,21 +37,53 @@ impl Direction {
 pub enum Command {
     /// Move in a direction
     Move(Direction),
-    /// Quit the game
-    Quit,
+    /// Enter Ex command mode
+    EnterExMode,
+    /// Execute an Ex command
+    ExCommand(ExCommand),
+    /// Cancel Ex mode (ESC)
+    CancelEx,
+    /// Add character to Ex buffer
+    ExInput(char),
+    /// Remove last character from Ex buffer (Backspace)
+    ExBackspace,
     /// Unknown/invalid command
     Unknown,
 }
 
-/// Parse a character into a command
-pub fn parse_command(c: char) -> Command {
+/// Ex commands (colon commands)
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum ExCommand {
+    /// Quit the game (:q or :quit)
+    Quit,
+}
+
+/// Parse a character into a command in Normal mode
+pub fn parse_normal_command(c: char) -> Command {
     match c {
         'h' => Command::Move(Direction::Left),
         'j' => Command::Move(Direction::Down),
         'k' => Command::Move(Direction::Up),
         'l' => Command::Move(Direction::Right),
-        'q' => Command::Quit,
+        ':' => Command::EnterExMode,
         _ => Command::Unknown,
+    }
+}
+
+/// Parse a character in Ex mode
+pub fn parse_ex_input(c: char) -> Command {
+    match c {
+        '\n' | '\r' => Command::Unknown, // Handled specially (execute command)
+        '\x1b' => Command::CancelEx, // ESC to cancel
+        _ => Command::ExInput(c),
+    }
+}
+
+/// Parse an Ex command string
+pub fn parse_ex_command(cmd: &str) -> Option<ExCommand> {
+    match cmd.trim() {
+        "q" | "quit" => Some(ExCommand::Quit),
+        _ => None,
     }
 }
 
@@ -61,10 +93,23 @@ mod tests {
 
     #[test]
     fn parse_movement_commands() {
-        assert_eq!(parse_command('h'), Command::Move(Direction::Left));
-        assert_eq!(parse_command('j'), Command::Move(Direction::Down));
-        assert_eq!(parse_command('k'), Command::Move(Direction::Up));
-        assert_eq!(parse_command('l'), Command::Move(Direction::Right));
+        assert_eq!(parse_normal_command('h'), Command::Move(Direction::Left));
+        assert_eq!(parse_normal_command('j'), Command::Move(Direction::Down));
+        assert_eq!(parse_normal_command('k'), Command::Move(Direction::Up));
+        assert_eq!(parse_normal_command('l'), Command::Move(Direction::Right));
+    }
+
+    #[test]
+    fn parse_ex_mode_entry() {
+        assert_eq!(parse_normal_command(':'), Command::EnterExMode);
+    }
+
+    #[test]
+    fn parse_ex_commands() {
+        assert_eq!(parse_ex_command("q"), Some(ExCommand::Quit));
+        assert_eq!(parse_ex_command("quit"), Some(ExCommand::Quit));
+        assert_eq!(parse_ex_command(" q "), Some(ExCommand::Quit));
+        assert_eq!(parse_ex_command("unknown"), None);
     }
 
     #[test]

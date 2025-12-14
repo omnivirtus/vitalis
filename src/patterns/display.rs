@@ -4,6 +4,7 @@
 //! keeping them out of the domain core.
 
 use crate::foundation::Position;
+use crate::patterns::modes::Mode;
 use crate::tapestry::Tapestry;
 use crate::threads::ThreadKind;
 use crossterm::{
@@ -44,6 +45,7 @@ pub fn render(
     terminal: &mut TerminalType,
     tapestry: &Tapestry,
     player_id: crate::threads::ThreadId,
+    mode: &Mode,
 ) -> io::Result<()> {
     terminal.draw(|f| {
         let chunks = Layout::default()
@@ -76,7 +78,8 @@ pub fn render(
         f.render_widget(game_view, chunks[1]);
 
         // Message bar
-        let message = Paragraph::new("-- NORMAL -- | hjkl to move, q to quit")
+        let mode_display = mode.display();
+        let message = Paragraph::new(mode_display)
             .block(Block::default().borders(Borders::ALL));
         f.render_widget(message, chunks[2]);
     })?;

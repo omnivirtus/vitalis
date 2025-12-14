@@ -18,7 +18,8 @@ pub enum ContestResult {
 
 /// Resolve a contest between two Threads using specified stats
 ///
-/// Formula: 50% + (stat_difference × 5%) + d20 + luck_modifier
+/// Uses opposed rolls: Both sides roll d20 + stat + luck modifier
+/// Higher roll wins, ties go to defender
 pub fn resolve_contest(
     initiator_props: &ThreadProperties,
     initiator_states: &ThreadStates,
@@ -29,42 +30,41 @@ pub fn resolve_contest(
 ) -> ContestResult {
     let mut rng = rand::thread_rng();
 
-    // Get base stats
-    let initiator_value = initiator_props.get_stat(initiator_stat) as i32;
-    let defender_value = defender_props.get_stat(defender_stat) as i32;
+    // Both sides roll d20
+    let initiator_d20: i32 = rng.gen_range(1..=20);
+    let defender_d20: i32 = rng.gen_range(1..=20);
 
-    // Calculate stat difference modifier (5% per point difference)
-    let stat_diff = initiator_value - defender_value;
-    let stat_modifier = stat_diff * 5;
+    // Get stats
+    let initiator_stat_value = initiator_props.get_stat(initiator_stat) as i32;
+    let defender_stat_value = defender_props.get_stat(defender_stat) as i32;
 
-    // Roll d20
-    let roll: i32 = rng.gen_range(1..=20);
-
-    // Luck modifiers (luck affects d20 roll, ±2 per 10 points)
-    let initiator_luck = initiator_props.luck as i32;
-    let defender_luck = defender_props.luck as i32;
-    let luck_modifier = (initiator_luck - defender_luck) / 5;
+    // Calculate luck modifiers (±1 per 5 points of luck)
+    let initiator_luck_mod = initiator_props.luck as i32 / 5;
+    let defender_luck_mod = defender_props.luck as i32 / 5;
 
     // State modifiers (future: implement state effects on contests)
-    let _state_modifier = calculate_state_modifier(initiator_states, defender_states);
+    let (initiator_state_mod, defender_state_mod) =
+        calculate_state_modifiers(initiator_states, defender_states);
 
-    // Total probability: 50 (base) + stat_modifier + roll + luck_modifier
-    let total = 50 + stat_modifier + roll + luck_modifier;
+    // Calculate total rolls
+    let initiator_total = initiator_d20 + initiator_stat_value + initiator_luck_mod + initiator_state_mod;
+    let defender_total = defender_d20 + defender_stat_value + defender_luck_mod + defender_state_mod;
 
-    // Success if total >= 50
-    if total >= 50 {
+    // Higher roll wins, ties go to defender
+    if initiator_total > defender_total {
         ContestResult::Success
     } else {
         ContestResult::Failure
     }
 }
 
-/// Calculate modifier from Thread states (currently stubbed)
-fn calculate_state_modifier(_initiator_states: &ThreadStates, _defender_states: &ThreadStates) -> i32 {
+/// Calculate modifiers from Thread states (currently stubbed)
+/// Returns (initiator_modifier, defender_modifier)
+fn calculate_state_modifiers(_initiator_states: &ThreadStates, _defender_states: &ThreadStates) -> (i32, i32) {
     // Future: Implement state effects on contests
     // - Damaged/Corrupted/Stressed reduce effectiveness
     // - Enhanced/Blessed/Experienced increase effectiveness
-    0
+    (0, 0)
 }
 
 #[cfg(test)]

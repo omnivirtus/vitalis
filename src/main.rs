@@ -8,7 +8,7 @@ use std::io;
 use vitalis::{
     foundation::Position,
     patterns::{
-        commands::{parse_command, Command},
+        commands::{parse_ex_command, parse_ex_input, parse_normal_command, Command, ExCommand},
         display::{init_terminal, render, restore_terminal},
         modes::Mode,
     },
@@ -75,24 +75,61 @@ fn run_game_loop(
     terminal: &mut vitalis::patterns::display::TerminalType,
     tapestry: &mut Tapestry,
     player_id: ThreadId,
-    _mode: &mut Mode,
+    mode: &mut Mode,
 ) -> io::Result<()> {
     loop {
         // Render current state
-        render(terminal, tapestry, player_id)?;
+        render(terminal, tapestry, player_id, mode)?;
 
         // Handle input
         if event::poll(std::time::Duration::from_millis(100))? {
             if let Event::Key(key) = event::read()? {
-                match key.code {
+                let command = match key.code {
                     KeyCode::Char(c) => {
-                        let command = parse_command(c);
-                        if !execute_command(command, tapestry, player_id) {
-                            break; // Quit command received
+                        if mode.is_ex() {
+                            // Check if Enter key sent as '\n' or '\r'
+                            if c == '\n' || c == '\r' {
+                                // Execute Ex command
+                                if let Some(cmd_str) = mode.command_buffer() {
+                                    if let Some(ex_cmd) = parse_ex_command(cmd_str) {
+                                        Command::ExCommand(ex_cmd)
+                                    } else {
+                                        Command::Unknown
+                                    }
+                                } else {
+                                    Command::Unknown
+                                }
+                            } else {
+                                parse_ex_input(c)
+                            }
+                        } else {
+                            parse_normal_command(c)
                         }
                     }
-                    KeyCode::Esc => break,
-                    _ => {}
+                    KeyCode::Enter if mode.is_ex() => {
+                        // Execute Ex command
+                        if let Some(cmd_str) = mode.command_buffer() {
+                            if let Some(ex_cmd) = parse_ex_command(cmd_str) {
+                                Command::ExCommand(ex_cmd)
+                            } else {
+                                Command::Unknown
+                            }
+                        } else {
+                            Command::Unknown
+                        }
+                    }
+                    KeyCode::Esc => {
+                        if mode.is_ex() {
+                            Command::CancelEx
+                        } else {
+                            continue; // In normal mode, ESC does nothing
+                        }
+                    }
+                    _ => Command::Unknown,
+                };
+
+                if !execute_command(command, tapestry, player_id, mode) {
+                    break; // Quit command received
                 }
             }
         }
@@ -101,7 +138,12 @@ fn run_game_loop(
     Ok(())
 }
 
-fn execute_command(command: Command, tapestry: &mut Tapestry, player_id: ThreadId) -> bool {
+fn execute_command(
+    command: Command,
+    tapestry: &mut Tapestry,
+    player_id: ThreadId,
+    mode: &mut Mode,
+) -> bool {
     match command {
         Command::Move(direction) => {
             if let Some(player) = tapestry.get_thread_mut(player_id) {
@@ -112,7 +154,28 @@ fn execute_command(command: Command, tapestry: &mut Tapestry, player_id: ThreadI
             }
             true // Continue game
         }
-        Command::Quit => false, // Exit game
+        Command::EnterExMode => {
+            *mode = Mode::Ex {
+                command_buffer: String::new(),
+            };
+            true
+        }
+        Command::ExInput(c) => {
+            if let Mode::Ex { command_buffer } = mode {
+                command_buffer.push(c);
+            }
+            true
+        }
+        Command::CancelEx => {
+            *mode = Mode::Normal;
+            true
+        }
+        Command::ExCommand(ex_cmd) => {
+            *mode = Mode::Normal; // Return to normal mode after command
+            match ex_cmd {
+                ExCommand::Quit => false, // Exit game
+            }
+        }
         Command::Unknown => true, // Ignore unknown commands
     }
 }

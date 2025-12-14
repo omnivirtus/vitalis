@@ -41,6 +41,46 @@ fn player_can_move_with_hjkl_commands() {
 }
 
 #[test]
+fn player_can_use_count_prefixes_for_movement() {
+    let mut game = VitalisGame::start();
+
+    // Player starts at world origin
+    assert_eq!(game.world_position(), (0, 0), "Player should start at origin");
+
+    // Move right 5 times with '5l'
+    game.type_text("5l");
+    assert_eq!(
+        game.world_position(),
+        (5, 0),
+        "Player should move right 5 times to (5, 0)"
+    );
+
+    // Move down 3 times with '3j'
+    game.type_text("3j");
+    assert_eq!(
+        game.world_position(),
+        (5, 3),
+        "Player should move down 3 times to (5, 3)"
+    );
+
+    // Move left 2 times with '2h'
+    game.type_text("2h");
+    assert_eq!(
+        game.world_position(),
+        (3, 3),
+        "Player should move left 2 times to (3, 3)"
+    );
+
+    // Move up 10 times with '10k'
+    game.type_text("10k");
+    assert_eq!(
+        game.world_position(),
+        (3, -7),
+        "Player should move up 10 times to (3, -7)"
+    );
+}
+
+#[test]
 fn player_quits_with_colon_q_command() {
     let mut game = VitalisGame::start();
 

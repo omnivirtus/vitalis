@@ -47,6 +47,8 @@ pub enum Command {
     ExInput(char),
     /// Remove last character from Ex buffer (Backspace)
     ExBackspace,
+    /// Add digit to count buffer in Normal mode
+    CountInput(char),
     /// Unknown/invalid command
     Unknown,
 }
@@ -66,6 +68,7 @@ pub fn parse_normal_command(c: char) -> Command {
         'k' => Command::Move(Direction::Up),
         'l' => Command::Move(Direction::Right),
         ':' => Command::EnterExMode,
+        '0'..='9' => Command::CountInput(c),
         _ => Command::Unknown,
     }
 }

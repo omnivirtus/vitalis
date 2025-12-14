@@ -153,13 +153,35 @@ fn execute_command(
 ) -> bool {
     match command {
         Command::Move(direction) => {
+            // Parse count from buffer (default to 1)
+            let count = if let Some(count_str) = mode.count_buffer() {
+                count_str.parse::<u32>().unwrap_or(1)
+            } else {
+                1
+            };
+
+            // Apply movement count times
             if let Some(player) = tapestry.get_thread_mut(player_id) {
-                if let Some(current_pos) = player.position {
-                    let new_pos = direction.apply_to(current_pos);
-                    player.position = Some(new_pos);
+                if let Some(mut current_pos) = player.position {
+                    for _ in 0..count {
+                        current_pos = direction.apply_to(current_pos);
+                    }
+                    player.position = Some(current_pos);
                 }
             }
+
+            // Clear count buffer after executing command
+            if let Mode::Normal { count_buffer } = mode {
+                count_buffer.clear();
+            }
+
             true // Continue game
+        }
+        Command::CountInput(digit) => {
+            if let Mode::Normal { count_buffer } = mode {
+                count_buffer.push(digit);
+            }
+            true
         }
         Command::EnterExMode => {
             *mode = Mode::Ex {
@@ -180,11 +202,15 @@ fn execute_command(
             true
         }
         Command::CancelEx => {
-            *mode = Mode::Normal;
+            *mode = Mode::Normal {
+                count_buffer: String::new(),
+            };
             true
         }
         Command::ExCommand(ex_cmd) => {
-            *mode = Mode::Normal; // Return to normal mode after command
+            *mode = Mode::Normal {
+                count_buffer: String::new(),
+            }; // Return to normal mode after command
             match ex_cmd {
                 ExCommand::Quit => false, // Exit game
             }

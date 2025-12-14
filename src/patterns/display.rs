@@ -48,13 +48,22 @@ pub fn render(
     mode: &Mode,
 ) -> io::Result<()> {
     terminal.draw(|f| {
+        // Determine if we need a command line row (Ex mode only)
+        let has_command_line = mode.is_ex();
+
+        let mut constraints = vec![
+            Constraint::Length(3), // Status bar
+            Constraint::Min(1),    // Game view
+            Constraint::Length(3), // Mode indicator bar
+        ];
+
+        if has_command_line {
+            constraints.push(Constraint::Length(1)); // Command line (no border)
+        }
+
         let chunks = Layout::default()
             .direction(Direction::Vertical)
-            .constraints([
-                Constraint::Length(3), // Status bar
-                Constraint::Min(1),    // Game view
-                Constraint::Length(3), // Message bar
-            ])
+            .constraints(constraints)
             .split(f.area());
 
         // Status bar
@@ -77,11 +86,29 @@ pub fn render(
         let game_view = render_game_view(tapestry, player_id, chunks[1]);
         f.render_widget(game_view, chunks[1]);
 
-        // Message bar
-        let mode_display = mode.display();
-        let message = Paragraph::new(mode_display)
+        // Mode indicator bar (mode name on left, pending keys on right)
+        let mode_name = mode.mode_name();
+        let pending_keys = mode.pending_keys();
+        let mode_line = if !pending_keys.is_empty() {
+            // Calculate spacing to right-align pending keys
+            let bar_width = chunks[2].width.saturating_sub(4) as usize; // Account for borders
+            let mode_len = mode_name.len();
+            let keys_len = pending_keys.len();
+            let spacing = bar_width.saturating_sub(mode_len + keys_len);
+            format!("{}{:width$}{}", mode_name, "", pending_keys, width = spacing)
+        } else {
+            mode_name.to_string()
+        };
+
+        let mode_bar = Paragraph::new(mode_line)
             .block(Block::default().borders(Borders::ALL));
-        f.render_widget(message, chunks[2]);
+        f.render_widget(mode_bar, chunks[2]);
+
+        // Command line (Ex mode only, no border)
+        if let Some(cmd_line) = mode.command_line() {
+            let command_paragraph = Paragraph::new(cmd_line);
+            f.render_widget(command_paragraph, chunks[3]);
+        }
     })?;
     Ok(())
 }

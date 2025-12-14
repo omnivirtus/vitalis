@@ -123,7 +123,15 @@ NEVER:
 - **Integrate with real externals** when possible, get as close to real as practical
 - **Test layer units as wholes** - mock only at architectural boundaries
 
-**Branching:** Feature branches, atomic commits, PRs at milestones
+**Branching Workflow (MANDATORY):**
+1. **Create feature branch** for each iteration/feature: `git checkout -b feature/descriptive-name`
+2. **Develop with TDD** on the feature branch
+3. **Commit atomically** following conventional commit format
+4. **Push and create PR** when feature is complete: `git push -u origin feature/name && gh pr create`
+5. **Merge via PR** (never push directly to main): `gh pr merge --squash --delete-branch`
+6. **Return to main** for next iteration: `git checkout main && git pull`
+
+**Never commit directly to main** - all changes must go through feature branches and PRs
 
 ### Commit Message Standards
 
@@ -271,10 +279,11 @@ src/
 **Before every response:**
 1. Am I about to write implementation code? If YES: Stop. Have I written and shown a failing test first?
 2. Am I following TDD? (Test first, then minimal implementation)
-3. Am I waiting for explicit approval before proceeding?
-4. Am I maintaining strict architectural boundaries?
-5. Am I using ubiquitous language correctly?
-6. Am I presenting design alternatives when they exist?
+3. Am I on a feature branch? (Never commit directly to main)
+4. Am I waiting for explicit approval before proceeding?
+5. Am I maintaining strict architectural boundaries?
+6. Am I using ubiquitous language correctly?
+7. Am I presenting design alternatives when they exist?
 
 **When proposing code:**
 - Show failing test FIRST (no exceptions, even for "obvious" features)

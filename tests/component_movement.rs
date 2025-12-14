@@ -78,6 +78,28 @@ fn player_quits_with_colon_quit_command() {
     assert!(!game.is_running(), "Game should quit after :quit command");
 }
 
+#[test]
+fn player_can_backspace_in_ex_mode() {
+    let mut game = VitalisGame::start();
+
+    // Enter command mode
+    game.press(':');
+
+    // Type 'quit' then backspace twice to get 'qu'
+    game.type_text("quit");
+    game.press('\x7f'); // Backspace (DEL character)
+    game.press('\x7f'); // Backspace (DEL character)
+
+    // Now type 'it' again to complete 'quit'
+    game.type_text("it");
+    game.press('\r');
+
+    // Give the game time to process quit and exit
+    std::thread::sleep(Duration::from_millis(500));
+
+    assert!(!game.is_running(), "Game should quit after typing :quit with backspaces");
+}
+
 /// Test harness for running and interacting with the Vitalis game
 struct VitalisGame {
     screen: ScreenBuffer,

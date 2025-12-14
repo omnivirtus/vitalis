@@ -125,6 +125,13 @@ fn run_game_loop(
                             continue; // In normal mode, ESC does nothing
                         }
                     }
+                    KeyCode::Backspace => {
+                        if mode.is_ex() {
+                            Command::ExBackspace
+                        } else {
+                            Command::Unknown
+                        }
+                    }
                     _ => Command::Unknown,
                 };
 
@@ -163,6 +170,12 @@ fn execute_command(
         Command::ExInput(c) => {
             if let Mode::Ex { command_buffer } = mode {
                 command_buffer.push(c);
+            }
+            true
+        }
+        Command::ExBackspace => {
+            if let Mode::Ex { command_buffer } = mode {
+                command_buffer.pop();
             }
             true
         }

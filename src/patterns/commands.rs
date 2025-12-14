@@ -45,6 +45,8 @@ pub enum Command {
     CancelEx,
     /// Add character to Ex buffer
     ExInput(char),
+    /// Remove last character from Ex buffer (Backspace)
+    ExBackspace,
     /// Unknown/invalid command
     Unknown,
 }

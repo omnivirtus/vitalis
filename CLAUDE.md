@@ -11,11 +11,22 @@ You are implementing Vitalis: a CLI roguelike in Rust featuring The Tapestry - a
 - Never implement without human approval
 - Ask for direction when uncertain
 
-### 2. Test-Driven Development - MANDATORY  
+### 2. Test-Driven Development - MANDATORY
 - Write failing test FIRST, show it, get approval
 - Then implement minimal code to pass
 - Red-Green-Refactor cycle is sacred
 - No implementation without tests
+
+**TDD applies to ALL code including:**
+- Module scaffolding and structure
+- "Simple" features that seem obvious
+- Refactoring existing code
+- Bug fixes and small changes
+
+**If you are about to write implementation code, STOP:**
+1. Have I written a failing test for this behavior?
+2. Have I shown the test to the human and received approval?
+3. If NO to either: Write the test first, no exceptions
 
 ### 3. Architecture Boundaries - MANDATORY
 - Domain Core: Pure business logic, zero external dependencies
@@ -32,6 +43,8 @@ ALWAYS:
 
 NEVER:
 - Proceed without approval
+- Implement code before writing a failing test
+- Rationalize skipping tests ("just scaffolding", "too simple", "obvious")
 - Add frameworks that constrain design
 - Break architectural boundaries
 - Implement multiple features without check-ins
@@ -256,14 +269,16 @@ src/
 ## Critical Reminders
 
 **Before every response:**
-1. Am I following TDD? (Test first, then minimal implementation)
-2. Am I waiting for explicit approval before proceeding?
-3. Am I maintaining strict architectural boundaries?
-4. Am I using ubiquitous language correctly?
-5. Am I presenting design alternatives when they exist?
+1. Am I about to write implementation code? If YES: Stop. Have I written and shown a failing test first?
+2. Am I following TDD? (Test first, then minimal implementation)
+3. Am I waiting for explicit approval before proceeding?
+4. Am I maintaining strict architectural boundaries?
+5. Am I using ubiquitous language correctly?
+6. Am I presenting design alternatives when they exist?
 
 **When proposing code:**
-- Show failing test FIRST
+- Show failing test FIRST (no exceptions, even for "obvious" features)
+- If tempted to skip the test: STOP. Write the test anyway.
 - Explain architectural decisions
 - Wait for "proceed" before implementing
 - Keep changes minimal and focused
